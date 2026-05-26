@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="IMMERSPHERE PRO – Visualización inmobiliaria premium y experiencias inmersivas de vanguardia.">
+    <title>IMMERSPHERE PRO · Visualización Inmobiliaria Premium</title>
+    <!-- Google Fonts: Inter for body text, Playfair Display for headings -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <!-- GSAP and ScrollTrigger via CDN for performant animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <style>
+        /*
+            Base Styles
+            --------------------------------------------------
+            The design emphasises readability and accessibility. A clear typographic hierarchy
+            guides the user through the content, while subtle motion and parallax effects
+            add premium flair without overwhelming the experience. Colours and fonts can
+            be customised globally via CSS variables.
+        */
+        :root {
+            /* Colours */
+            --colour-bg-primary: #0A0F16;
+            --colour-bg-secondary: #111924;
+            --colour-accent: #00D4FF;
+            --colour-accent-warm: #FFC86B;
+            --colour-text-primary: #F5F8FC;
+            --colour-text-secondary: #8DA3C2;
+            --colour-border: rgba(255, 255, 255, 0.08);
+            /* Typography */
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --fs-h1: clamp(2.4rem, 5vw + 1rem, 4rem);
+            --fs-h2: clamp(1.6rem, 2vw + 1rem, 2.5rem);
+            --fs-h3: 1.5rem;
+            --fs-body: 1rem;
+            --fs-small: 0.85rem;
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 2rem;
+            --space-lg: 4rem;
+            /* Animation durations */
+            --dur-fast: 0.4s;
+            --dur-medium: 0.8s;
+        }
+
+        /* Global reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 4rem;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: var(--fs-body);
+            background: var(--colour-bg-primary);
+            color: var(--colour-text-primary);
+            line-height: 1.6;
+        }
+
+        /* Accessible skip link */
+        .skip-to-content {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--colour-accent);
+            color: var(--colour-bg-primary);
+            padding: 0.5rem 1rem;
+            z-index: 1000;
+            transition: top 0.3s ease;
+        }
+        .skip-to-content:focus {
+            top: 0;
+        }
+
+        /* Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            backdrop-filter: blur(12px);
+            background: rgba(10, 15, 22, 0.8);
+            border-bottom: 1px solid var(--colour-border);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-sm);
+        }
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--colour-accent);
+        }
+        nav {
+            display: flex;
+            gap: var(--space-md);
+        }
+        nav a {
+            font-size: var(--fs-small);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--colour-text-secondary);
+            position: relative;
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 4px;
+            transition: color var(--dur-fast), background var(--dur-fast);
+        }
+        nav a:hover,
+        nav a:focus {
+            color: var(--colour-accent);
+            background: rgba(0, 212, 255, 0.1);
+            outline: none;
+        }
+        /* Mobile nav toggle */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--colour-text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            nav {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: var(--colour-bg-secondary);
+                flex-direction: column;
+                width: 200px;
+                border-radius: 0 0 0 8px;
+                overflow: hidden;
+                max-height: 0;
+                transition: max-height var(--dur-medium) ease;
+            }
+            nav.open {
+                max-height: 500px;
+            }
+            .nav-toggle {
+                display: block;
+            }
+        }
+
+        /* Sections */
+        section {
+            position: relative;
+            padding: var(--space-lg) var(--space-sm);
+        }
+        section:nth-of-type(odd) {
+            background: var(--colour-bg-primary);
+        }
+        section:nth-of-type(even) {
+            background: var(--colour-bg-secondary);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .hero video,
+        .hero img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(0.4);
+        }
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: var(--fs-h1);
+            line-height: 1.1;
+            margin-bottom: var(--space-sm);
+        }
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-inline: auto;
+            margin-bottom: var(--space-md);
+            color: var(--colour-text-secondary);
+        }
+        .btn-primary {
+            display: inline-block;
+            background: var(--colour-accent);
+            color: var(--colour-bg-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background var(--dur-fast), transform var(--dur-fast);
+        }
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background: var(--colour-accent-warm);
+            transform: translateY(-3px);
+            outline: none;
+        }
+
+        /* Features */
+        .features-grid {
+            display: grid;
+            gap: var(--space-md);
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            margin-top: var(--space-lg);
+        }
+        .feature {
+            padding: var(--space-md);
+            background: var(--colour-bg-primary);
+            border: 1px solid var(--colour-border);
+            border-radius: 12px;
+            text-align: center;
+            transition: transform var(--dur-fast);
+        }
+        .feature:hover {
+            transform: translateY(-4px);
+        }
+        .feature h3 {
+            font-family: var(--font-heading);
+            font-size: var(--fs-h3);
+            color: var(--colour-accent);
+            margin-bottom: var(--space-xs);
+        }
+        .feature p {
+            color: var(--colour-text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Showcase */
+        .showcase-grid {
+            display: grid;
+            gap: var(--space-md);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            margin-top: var(--space-lg);
+        }
+        .showcase-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--colour-border);
+        }
+        .showcase-item img,
+        .showcase-item video {
+            width: 100%;
+            display: block;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            transition: transform var(--dur-medium);
+        }
+        .showcase-item:hover img,
+        .showcase-item:hover video {
+            transform: scale(1.05);
+        }
+        .showcase-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(10, 15, 22, 0) 60%, rgba(10, 15, 22, 0.8));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: var(--space-md);
+            opacity: 0;
+            transition: opacity var(--dur-medium);
+        }
+        .showcase-item:hover .showcase-overlay {
+            opacity: 1;
+        }
+        .showcase-overlay h4 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            color: var(--colour-text-primary);
+        }
+        .showcase-overlay span {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--colour-accent);
+        }
+
+        /* Social proof */
+        .social-proof {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+        .social-item {
+            text-align: center;
+        }
+        .social-item .number {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            color: var(--colour-accent);
+        }
+        .social-item .label {
+            font-family: var(--font-body);
+            font-size: var(--fs-small);
+            color: var(--colour-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* CTA Section */
+        .cta {
+            text-align: center;
+            padding: var(--space-lg) var(--space-sm);
+        }
+        .cta h2 {
+            font-family: var(--font-heading);
+            font-size: var(--fs-h2);
+            margin-bottom: var(--space-sm);
+        }
+        .cta p {
+            max-width: 600px;
+            margin-inline: auto;
+            margin-bottom: var(--space-md);
+            color: var(--colour-text-secondary);
+        }
+        .cta-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .cta-form input,
+        .cta-form textarea {
+            padding: var(--space-sm);
+            border: 1px solid var(--colour-border);
+            border-radius: 8px;
+            background: var(--colour-bg-secondary);
+            color: var(--colour-text-primary);
+            font-size: 0.95rem;
+        }
+        .cta-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .cta-form button {
+            background: var(--colour-accent);
+            color: var(--colour-bg-primary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background var(--dur-fast), transform var(--dur-fast);
+        }
+        .cta-form button:hover,
+        .cta-form button:focus {
+            background: var(--colour-accent-warm);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--colour-bg-primary);
+            border-top: 1px solid var(--colour-border);
+            padding: var(--space-lg) var(--space-sm);
+            text-align: center;
+        }
+        footer p {
+            font-size: var(--fs-small);
+            color: var(--colour-text-secondary);
+        }
+        footer a {
+            color: var(--colour-accent);
+            transition: color var(--dur-fast);
+        }
+        footer a:hover {
+            color: var(--colour-accent-warm);
+        }
+
+        /* Reveal animations (applied via JS) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity var(--dur-medium) ease, transform var(--dur-medium) ease;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-to-content">Saltar al contenido</a>
+    <header>
+        <div class="nav-container">
+            <div class="logo">IMMERSPHERE</div>
+            <button class="nav-toggle" aria-label="Mostrar navegación">☰</button>
+            <nav aria-label="Principal">
+                <a href="#hero">Inicio</a>
+                <a href="#services">Servicios</a>
+                <a href="#videos">Vídeos</a>
+                <a href="#portfolio">Portfolio</a>
+                <a href="#sobrenosotros">Nosotros</a>
+                <a href="#contacto">Contacto</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- Hero Section -->
+        <section id="hero" class="hero">
+            <video autoplay muted loop playsinline poster="" aria-hidden="true">
+                <source src="https://cdn.pixabay.com/video/2022/07/21/124401-734049929_large.mp4" type="video/mp4">
+            </video>
+            <h1 class="reveal">Visualización Inmobiliaria de Nueva Generación</h1>
+            <p class="reveal" style="transition-delay: 0.15s;">Diseñamos experiencias inmersivas que hacen que tus proyectos cobren vida. Descubre cómo nuestros tours virtuales y renders fotorrealistas convierten la visión en realidad.</p>
+            <a href="#contacto" class="btn-primary reveal" style="transition-delay: 0.3s;">Solicita una demo</a>
+        </section>
+
+        <!-- Services / Features Section -->
+        <section id="services">
+            <div class="reveal">
+                <h2 style="font-family: var(--font-heading); font-size: var(--fs-h2); text-align:center;">Nuestros Servicios</h2>
+                <p style="text-align:center; max-width:600px; margin:0 auto; color: var(--colour-text-secondary);">Combinamos creatividad y tecnología para ofrecer soluciones a medida. Nuestra gama de servicios está diseñada para captar y mantener la atención de tus clientes.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature reveal">
+                    <h3>Tours Virtuales</h3>
+                    <p>Recorre cada rincón de tus propiedades con visitas interactivas y panorámicas en 360° que cautivan a clientes potenciales.</p>
+                </div>
+                <div class="feature reveal" style="transition-delay:0.1s;">
+                    <h3>Renders Fotorrealistas</h3>
+                    <p>Imágenes hiperrealistas que muestran cómo quedarán los espacios finales y aceleran la toma de decisiones.</p>
+                </div>
+                <div class="feature reveal" style="transition-delay:0.2s;">
+                    <h3>Experiencias Interactivas</h3>
+                    <p>Presentaciones inmersivas con efectos de parallax y animaciones coordinadas para dejar una impresión duradera.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio / Showcase Section -->
+        <section id="portfolio">
+            <div class="reveal">
+                <h2 style="font-family: var(--font-heading); font-size: var(--fs-h2); text-align:center;">Portafolio Destacado</h2>
+                <p style="text-align:center; max-width:600px; margin:0 auto; color: var(--colour-text-secondary);">Explora algunos de nuestros proyectos recientes y observa cómo transformamos conceptos en realidades visuales.</p>
+            </div>
+            <div class="showcase-grid">
+                <!-- Example showcase item 1 -->
+                <div class="showcase-item reveal">
+                    <img src="https://images.unsplash.com/photo-1538688525198-345d95376aa1?auto=format&fit=crop&w=800&q=80" alt="Render de salón moderno" />
+                    <div class="showcase-overlay">
+                        <span>Render</span>
+                        <h4>Salón Moderno</h4>
+                    </div>
+                </div>
+                <!-- Example showcase item 2 -->
+                <div class="showcase-item reveal" style="transition-delay:0.1s;">
+                    <video autoplay muted loop playsinline>
+                        <source src="https://cdn.videvo.net/videvo_files/video/free/2019-03/large_watermarked/190213_01_City_02_preview.mp4" type="video/mp4">
+                    </video>
+                    <div class="showcase-overlay">
+                        <span>Tour Virtual</span>
+                        <h4>Ático Panorámico</h4>
+                    </div>
+                </div>
+                <!-- Example showcase item 3 -->
+                <div class="showcase-item reveal" style="transition-delay:0.2s;">
+                    <img src="https://images.unsplash.com/photo-1527030280862-64139fba04ca?auto=format&fit=crop&w=800&q=80" alt="Render exterior" />
+                    <div class="showcase-overlay">
+                        <span>Render</span>
+                        <h4>Exterior Nocturno</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Video Section -->
+        <section id="videos">
+            <div class="reveal">
+                <h2 style="font-family: var(--font-heading); font-size: var(--fs-h2); text-align:center;">Vídeos Destacados</h2>
+                <p style="text-align:center; max-width:600px; margin:0 auto; color: var(--colour-text-secondary);">Descubre nuestras producciones audiovisuales. Cada vídeo muestra la esencia de nuestros proyectos con dinamismo y realismo.</p>
+            </div>
+            <div class="showcase-grid">
+                <!-- Vídeo 1 proporcionado por el cliente (GitHub) -->
+                <div class="showcase-item reveal">
+                    <video autoplay muted loop playsinline controls>
+                        <!-- Sustituye la URL con la ruta raw de tu repositorio de GitHub donde se encuentra el primer vídeo -->
+                        <source src="https://raw.githubusercontent.com/Juanmaes83/REPO/master/assets/video1.mp4" type="video/mp4">
+                    </video>
+                    <div class="showcase-overlay">
+                        <span>Demo Vídeo</span>
+                        <h4>Proyecto 1</h4>
+                    </div>
+                </div>
+                <!-- Vídeo 2 proporcionado por el cliente (GitHub) -->
+                <div class="showcase-item reveal" style="transition-delay:0.1s;">
+                    <video autoplay muted loop playsinline controls>
+                        <!-- Sustituye la URL con la ruta raw de tu repositorio de GitHub donde se encuentra el segundo vídeo -->
+                        <source src="https://raw.githubusercontent.com/Juanmaes83/REPO/master/assets/video2.mp4" type="video/mp4">
+                    </video>
+                    <div class="showcase-overlay">
+                        <span>Demo Vídeo</span>
+                        <h4>Proyecto 2</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="sobrenosotros">
+            <div class="reveal">
+                <h2 style="font-family: var(--font-heading); font-size: var(--fs-h2); text-align:center;">Sobre Nosotros</h2>
+                <p style="text-align:center; max-width:700px; margin:0 auto; color: var(--colour-text-secondary);">Somos un equipo de creativos y tecnólogos apasionados por la visualización arquitectónica. Con años de experiencia en el sector, fusionamos arte, marketing y tecnología para que tus proyectos brillen. Nuestra misión es convertir cada idea en una experiencia inmersiva que emocione y convenza.</p>
+            </div>
+            <div class="features-grid" style="margin-top: var(--space-lg);">
+                <div class="feature reveal">
+                    <h3>Visión Creativa</h3>
+                    <p>Nuestros diseñadores y directores de arte buscan la excelencia estética en cada detalle, creando narrativas visuales memorables.</p>
+                </div>
+                <div class="feature reveal" style="transition-delay:0.1s;">
+                    <h3>Innovación Tecnológica</h3>
+                    <p>Incorporamos las últimas herramientas de modelado 3D, rendering y realidad virtual para ofrecer experiencias sin precedentes.</p>
+                </div>
+                <div class="feature reveal" style="transition-delay:0.2s;">
+                    <h3>Compromiso Humano</h3>
+                    <p>Trabajamos estrechamente contigo para entender tus necesidades y superar tus expectativas en cada proyecto.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Proof Section -->
+        <section>
+            <div class="reveal">
+                <h2 style="font-family: var(--font-heading); font-size: var(--fs-h2); text-align:center;">Resultados que Inspiran Confianza</h2>
+            </div>
+            <div class="social-proof">
+                <div class="social-item reveal">
+                    <div class="number">+50</div>
+                    <div class="label">Proyectos Realizados</div>
+                </div>
+                <div class="social-item reveal" style="transition-delay:0.1s;">
+                    <div class="number">+10K</div>
+                    <div class="label">Visitas en Tours</div>
+                </div>
+                <div class="social-item reveal" style="transition-delay:0.2s;">
+                    <div class="number">98%</div>
+                    <div class="label">Clientes Satisfechos</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="contacto" class="cta">
+            <div class="reveal">
+                <h2>Listo para Elevar tu Proyecto</h2>
+                <p>Cuéntanos sobre tus necesidades y descubre cómo nuestra tecnología puede aportar valor a tu negocio inmobiliario.</p>
+            </div>
+            <form class="cta-form reveal" action="#" method="post" style="transition-delay:0.15s;">
+                <input type="text" name="nombre" placeholder="Tu nombre" required>
+                <input type="email" name="email" placeholder="Tu correo electrónico" required>
+                <textarea name="mensaje" placeholder="Cuéntanos sobre tu proyecto" required></textarea>
+                <button type="submit">Enviar Mensaje</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 IMMERSPHERE PRO. Todos los derechos reservados. | <a href="mailto:info@immerspherepro.com">info@immerspherepro.com</a></p>
+    </footer>
+
+    <script>
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('nav');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('open');
+        });
+
+        // GSAP reveal animations using IntersectionObserver for better performance
+        document.addEventListener('DOMContentLoaded', () => {
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const revealElements = document.querySelectorAll('.reveal');
+
+            if (prefersReducedMotion) {
+                // If user prefers reduced motion, show elements without animations
+                revealElements.forEach(el => {
+                    el.classList.add('visible');
+                });
+                return;
+            }
+
+            const observerOptions = {
+                threshold: 0.15
+            };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            revealElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // Parallax backgrounds with GSAP ScrollTrigger
+        window.addEventListener('DOMContentLoaded', () => {
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReducedMotion || typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+                return;
+            }
+            gsap.registerPlugin(ScrollTrigger);
+            // Example parallax effect on hero heading
+            gsap.to('.hero h1', {
+                yPercent: -20,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '#hero',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+            gsap.to('.hero p', {
+                yPercent: -10,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '#hero',
+                    start: 'top center',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+        });
+    </script>
+</body>
+</html>
